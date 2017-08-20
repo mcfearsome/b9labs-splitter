@@ -8,7 +8,6 @@ contract('Splitter', accounts => {
     var groupIndex;
     var groupCollection = [];
 
-
     Splitter.deployed()
       .then(_instance => {
         instance = _instance;
@@ -79,7 +78,6 @@ contract('Splitter', accounts => {
         return instance.createSplitGroup(accounts.slice(1, 3), { from: accounts[0] });
       })
       .then(txInfo => {
-        console.log('group created')
         return instance.sendTransaction({
           from: web3.eth.accounts[1],
           value: 3
