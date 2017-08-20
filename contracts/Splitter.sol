@@ -16,20 +16,39 @@ contract Owned {
     }
 }
 
-contract BalanceHolder {
+contract BalanceManager {
     mapping(address => uint) balances;
-    event WithdrawPerformed(address indexed receiver, uint amount);
+    event WithdrawCompleted(address indexed receiver, uint amount);
+
+    function balanceAdd(address toAddress, uint amount) internal {
+      balances[toAddress] += amount;
+    }
+
+    function balanceSubtract(address fromAddress, uint amount) internal {
+      balances[fromAddress] -= amount;
+      assert(balances[fromAddress] >= 0);
+    }
+
+    function balanceTransfer(address fromAddress, address toAddress, uint amount) internal {
+      balanceSubtract(fromAddress, amount);
+      balanceAdd(toAddress, amount);
+    }
+
+    function drain(address fromAddress) internal returns(uint) {
+      uint currentAmount = balances[fromAddress];
+      balances[fromAddress] = 0;
+      return currentAmount;
+    }
 
     function withdraw() {
         require(balances[msg.sender] > 0);
-        uint toSend = balances[msg.sender];
-        balances[msg.sender] = 0;
+        uint toSend = drain(msg.sender);
         msg.sender.transfer(toSend);
-        WithdrawPerformed(msg.sender, toSend);
+        WithdrawCompleted(msg.sender, toSend);
     }
 }
 
-contract Splitter is Owned, BalanceHolder {
+contract Splitter is Owned, BalanceManager {
     uint numGroups = 1;
     mapping(uint => address[3]) public splitGroups;
     mapping(address => uint) public splitGroupsByAddress;
@@ -63,13 +82,15 @@ contract Splitter is Owned, BalanceHolder {
 
     function split() payable senderPartOfGroup {
         address[3] memory members = splitGroups[splitGroupsByAddress[msg.sender]];
-        uint8 receiverIndex = 0;
         address[2] memory receivers;
+        uint8 receiverIndex = 0;
+        uint half = msg.value / 2;
 
+        balanceAdd(msg.sender, msg.value);
         for(uint8 i = 0; i < members.length; i++) {
             if(members[i] != msg.sender) {
                 receivers[receiverIndex++] = members[i];
-                balances[members[i]] = msg.value / 2;
+                balanceTransfer(msg.sender, members[i], half);
             }
         }
         SplitOccurred(msg.sender, receivers, msg.value);
@@ -84,9 +105,7 @@ contract Splitter is Owned, BalanceHolder {
     }
 
     function isGroupMember(address forAddress) constant returns (bool) {
-      if(splitGroupsByAddress[forAddress] == 0) {
-        return false;
-      }
+      if(splitGroupsByAddress[forAddress] == 0) { return false; }
       return true;
     }
 
