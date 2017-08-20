@@ -26,7 +26,7 @@ contract BalanceHolder {
 }
 
 contract Splitter is Owned, BalanceHolder {
-    uint numGroups;
+    uint numGroups = 1;
     mapping(uint => address[3]) public splitGroups;
     mapping(address => uint) public splitGroupsByAddress;
     event SplitGroupCreated(address indexed creator, address[3] members);
@@ -41,7 +41,7 @@ contract Splitter is Owned, BalanceHolder {
         // Ensure sender isn't in a group already
         require(splitGroupsByAddress[msg.sender] == 0);
         require(others[0] != others[1]);
-        for(uint8 j = 0; i < 2; i++) {
+        for(uint8 j = 0; j < 2; j++) {
             require(others[j] != msg.sender);
             require(others[j] != 0x0);
             // Ensure others are'nt in a group already
