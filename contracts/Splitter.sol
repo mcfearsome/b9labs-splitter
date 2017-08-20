@@ -41,10 +41,14 @@ contract BalanceManager {
     }
 
     function withdraw() {
-        require(balances[msg.sender] > 0);
-        uint toSend = drain(msg.sender);
-        msg.sender.transfer(toSend);
-        WithdrawCompleted(msg.sender, toSend);
+      withdrawToAddress(msg.sender);
+    }
+
+    function withdrawToAddress(address receiver) internal {
+      require(balances[receiver] > 0);
+      uint toSend = drain(receiver);
+      receiver.transfer(toSend);
+      WithdrawCompleted(receiver, toSend);
     }
 }
 
@@ -56,52 +60,59 @@ contract Splitter is Owned, BalanceManager {
     event SplitOccurred(address indexed splitter, address[2] receivers, uint amount);
 
     modifier senderPartOfGroup {
-        require(isGroupMember(msg.sender));
-        _;
+      require(isGroupMember(msg.sender));
+      _;
     }
 
     function createSplitGroup(address[2] others) {
-        // Ensure sender isn't in a group already
-        require(!isGroupMember(msg.sender));
-        require(others[0] != others[1]);
-        for(uint8 j = 0; j < 2; j++) {
-            require(others[j] != msg.sender);
-            require(others[j] != 0x0);
-            // Ensure others aren't in a group already
-            require(!isGroupMember(others[j]));
-        }
-        address[3] memory addresses = [others[0], others[1], msg.sender];
-        uint theIndex = numGroups++;
-        splitGroups[theIndex] = addresses;
+      // Ensure sender isn't in a group already
+      require(!isGroupMember(msg.sender));
+      require(others[0] != others[1]);
+      for(uint8 j = 0; j < 2; j++) {
+        require(others[j] != msg.sender);
+        require(others[j] != 0x0);
+        // Ensure others aren't in a group already
+        require(!isGroupMember(others[j]));
+      }
+      address[3] memory addresses = [others[0], others[1], msg.sender];
+      uint theIndex = numGroups++;
+      splitGroups[theIndex] = addresses;
 
-        for(uint8 i = 0;  i < 3; i++) {
-            splitGroupsByAddress[addresses[i]] = theIndex;
-        }
-        SplitGroupCreated(msg.sender, addresses);
+      for(uint8 i = 0;  i < 3; i++) {
+        splitGroupsByAddress[addresses[i]] = theIndex;
+      }
+      SplitGroupCreated(msg.sender, addresses);
     }
 
     function split() payable senderPartOfGroup {
-        address[3] memory members = splitGroups[splitGroupsByAddress[msg.sender]];
-        address[2] memory receivers;
-        uint8 receiverIndex = 0;
-        uint half = msg.value / 2;
+      address[3] memory members = splitGroups[splitGroupsByAddress[msg.sender]];
+      address[2] memory receivers;
+      uint8 receiverIndex = 0;
+      uint half = msg.value / 2;
 
-        balanceAdd(msg.sender, msg.value);
-        for(uint8 i = 0; i < members.length; i++) {
-            if(members[i] != msg.sender) {
-                receivers[receiverIndex++] = members[i];
-                balanceTransfer(msg.sender, members[i], half);
-            }
+      balanceAdd(msg.sender, msg.value);
+      for(uint8 i = 0; i < members.length; i++) {
+        if(members[i] != msg.sender) {
+          receivers[receiverIndex++] = members[i];
+          balanceTransfer(msg.sender, members[i], half);
         }
-        SplitOccurred(msg.sender, receivers, msg.value);
+      }
+      SplitOccurred(msg.sender, receivers, msg.value);
+    }
+
+    function groupWithdraw() senderPartOfGroup {
+      address[3] memory members = splitGroups[splitGroupsByAddress[msg.sender]];
+      for(uint8 i = 0; i < 3; i++) {
+        withdrawToAddress(members[i]);
+      }
     }
 
     function showGroupBalances(address forAddress) constant returns (address[3] members, uint[3] memberBalances) {
-        members = splitGroups[splitGroupsByAddress[forAddress]];
-        for(uint8 i = 0; i < members.length; i++) {
-            memberBalances[i] = balances[members[i]];
-        }
-        return (members, memberBalances);
+      members = splitGroups[splitGroupsByAddress[forAddress]];
+      for(uint8 i = 0; i < 3; i++) {
+        memberBalances[i] = balances[members[i]];
+      }
+      return (members, memberBalances);
     }
 
     function isGroupMember(address forAddress) constant returns (bool) {
@@ -110,6 +121,6 @@ contract Splitter is Owned, BalanceManager {
     }
 
     function() payable senderPartOfGroup {
-        split();
+      split();
     }
 }
