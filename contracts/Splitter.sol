@@ -10,6 +10,10 @@ contract Owned {
         require(msg.sender == owner);
         _;
     }
+
+    function kill() onlyOwner {
+        suicide(owner);
+    }
 }
 
 contract BalanceHolder {
@@ -33,19 +37,19 @@ contract Splitter is Owned, BalanceHolder {
     event SplitOccurred(address indexed splitter, address[2] receivers, uint amount);
 
     modifier senderPartOfGroup {
-        require(splitGroupsByAddress[msg.sender] != 0);
+        require(isGroupMember(msg.sender));
         _;
     }
 
     function createSplitGroup(address[2] others) {
         // Ensure sender isn't in a group already
-        require(splitGroupsByAddress[msg.sender] == 0);
+        require(!isGroupMember(msg.sender));
         require(others[0] != others[1]);
         for(uint8 j = 0; j < 2; j++) {
             require(others[j] != msg.sender);
             require(others[j] != 0x0);
-            // Ensure others are'nt in a group already
-            require(splitGroupsByAddress[msg.sender] == 0);
+            // Ensure others aren't in a group already
+            require(!isGroupMember(others[j]));
         }
         address[3] memory addresses = [others[0], others[1], msg.sender];
         uint theIndex = numGroups++;
@@ -79,8 +83,11 @@ contract Splitter is Owned, BalanceHolder {
         return (members, memberBalances);
     }
 
-    function kill() onlyOwner {
-        suicide(owner);
+    function isGroupMember(address forAddress) constant returns (bool) {
+      if(splitGroupsByAddress[forAddress] == 0) {
+        return false;
+      }
+      return true;
     }
 
     function() payable senderPartOfGroup {
