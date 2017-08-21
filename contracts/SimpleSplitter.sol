@@ -8,14 +8,14 @@ contract SimpleSplitter is mortal {
   function split(address receiverOne, address receiverTwo) payable {
     uint half = msg.value / 2;
     uint8 remainder = uint8(msg.value % 2);
-    balances[receiverOne] = half;
-    balances[receiverTwo] = half;
+    balances[receiverOne] += half;
+    balances[receiverTwo] += half;
     if(remainder > 0) {
       // What to do with this is the question?
       // It's not fair to give it to either of the receivers in my eyes
       // So I will store it in the balance of the sender
       // They can either withdraw it, or if they receive a split they will get it
-      balances[msg.sender] = remainder;
+      balances[msg.sender] += remainder;
     }
 
     assert(_withdraw(receiverOne));
