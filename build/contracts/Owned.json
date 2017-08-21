@@ -1,35 +1,14 @@
 {
-  "contract_name": "Owned",
+  "contract_name": "owned",
   "abi": [
-    {
-      "constant": false,
-      "inputs": [],
-      "name": "kill",
-      "outputs": [],
-      "payable": false,
-      "type": "function"
-    },
-    {
-      "constant": true,
-      "inputs": [],
-      "name": "owner",
-      "outputs": [
-        {
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "payable": false,
-      "type": "function"
-    },
     {
       "inputs": [],
       "payable": false,
       "type": "constructor"
     }
   ],
-  "unlinked_binary": "0x6060604052341561000c57fe5b5b60008054600160a060020a03191633600160a060020a03161790555b5b60c9806100386000396000f300606060405263ffffffff60e060020a60003504166341c0e1b58114602a5780638da5cb5b146039575bfe5b3415603157fe5b60376062565b005b3415604057fe5b6046608e565b60408051600160a060020a039092168252519081900360200190f35b60005433600160a060020a03908116911614607d5760006000fd5b600054600160a060020a0316ff5b5b565b600054600160a060020a0316815600a165627a7a72305820dac398fcce18da69f9495283fa0e60089864a53d86088e943d9721b70ecc70790029",
+  "unlinked_binary": "0x60606040523415600b57fe5b5b60008054600160a060020a03191633600160a060020a03161790555b5b60338060366000396000f30060606040525bfe00a165627a7a72305820317087cd8ddd55e639077c1939a38ec7c108c664b99548296e69e62874e14c0a0029",
   "networks": {},
   "schema_version": "0.0.5",
-  "updated_at": 1503243138111
+  "updated_at": 1503277329389
 }
