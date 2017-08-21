@@ -7,7 +7,7 @@ contract SimpleSplitter is mortal {
 
   function split(address receiverOne, address receiverTwo) payable {
     uint half = msg.value / 2;
-    uint8 remainder = uint8(msg.value - (2 * half));
+    uint8 remainder = uint8(msg.value % 2;
     balances[receiverOne] = half;
     balances[receiverTwo] = half;
     if(remainder > 0) {
