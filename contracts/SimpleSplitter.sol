@@ -8,15 +8,15 @@ contract SimpleSplitter is mortal {
   event WithdrawCompleted(address indexed receiver, uint amount);
 
   function split(address receiverOne, address receiverTwo) payable {
-    require(msg.value > 0);
+    // greater than 1 because we want the minimal amount of wei that can be evenly split
+    require(msg.value > 1);
     require(receiverOne != receiverTwo);
     require(receiverOne != 0x0 && receiverTwo != 0x0);
     require(receiverOne != msg.sender && receiverTwo != msg.sender);
 
     uint half = msg.value / 2;
-    assert(half > 0);
-
     uint8 remainder = uint8(msg.value % half);
+    
     balances[receiverOne] += half;
     balances[receiverTwo] += half;
     if(remainder > 0) {
@@ -48,5 +48,6 @@ contract SimpleSplitter is mortal {
     return result;
   }
 
+  // do not allow the contract to recieve ethers in a normal transaction
   function() { }
 }
