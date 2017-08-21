@@ -22,8 +22,8 @@ contract SimpleSplitter is mortal {
     assert(_withdraw(receiverTwo));
   }
 
-  function withdraw() returns(bool) {
-    return _withdraw(msg.sender);
+  function withdraw() {
+    assert(_withdraw(msg.sender));
   }
 
   function _withdraw(address to) internal returns(bool) {
