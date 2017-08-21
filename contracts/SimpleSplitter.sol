@@ -13,8 +13,8 @@ contract SimpleSplitter is mortal {
 
     uint half = msg.value / 2;
     assert(half > 0);
-    
-    uint8 remainder = uint8(msg.value % 2);
+
+    uint8 remainder = uint8(msg.value % half);
     balances[receiverOne] += half;
     balances[receiverTwo] += half;
     if(remainder > 0) {
