@@ -3,7 +3,7 @@ pragma solidity ^0.4.11;
 import "./mortal.sol";
 
 contract SimpleSplitter is mortal {
-  mapping(address => uint) balances;
+  mapping(address => uint) public balances;
 
   function split(address receiverOne, address receiverTwo) payable {
     require(msg.value > 0);
