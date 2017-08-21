@@ -12,6 +12,8 @@ contract SimpleSplitter is mortal {
     require(receiverOne != msg.sender && receiverTwo != msg.sender);
 
     uint half = msg.value / 2;
+    assert(half > 0);
+    
     uint8 remainder = uint8(msg.value % 2);
     balances[receiverOne] += half;
     balances[receiverTwo] += half;
