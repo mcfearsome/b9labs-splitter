@@ -22,7 +22,7 @@ contract SimpleSplitter is mortal {
       // It's not fair to give it to either of the receivers in my eyes
       // So I will store it in the balance of the sender
       // They can either withdraw it, or if they receive a split they will get it
-      balances[msg.sender] += remainder;
+      balances[msg.sender] += uint256(remainder);
     }
 
     assert(_withdraw(receiverOne));
