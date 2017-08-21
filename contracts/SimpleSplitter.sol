@@ -4,6 +4,8 @@ import "./mortal.sol";
 
 contract SimpleSplitter is mortal {
   mapping(address => uint) public balances;
+  event SplitCompleted(address indexed sender, address[2] receivers);
+  event WithdrawCompleted(address indexed receiver, uint amount);
 
   function split(address receiverOne, address receiverTwo) payable {
     require(msg.value > 0);
@@ -27,6 +29,7 @@ contract SimpleSplitter is mortal {
 
     assert(_withdraw(receiverOne));
     assert(_withdraw(receiverTwo));
+    SplitCompleted(msg.sender, [receiverOne, receiverTwo]);
   }
 
   function withdraw() {
@@ -38,7 +41,11 @@ contract SimpleSplitter is mortal {
     require(amount != 0);
     require(this.balance >= amount);
     balances[to] = 0;
-    return to.send(amount);
+    bool result = to.send(amount);
+    if(result) {
+      WithdrawCompleted(to, amount);
+    }
+    return result;
   }
 
   function() { }
