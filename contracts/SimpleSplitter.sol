@@ -6,6 +6,11 @@ contract SimpleSplitter is mortal {
   mapping(address => uint) balances;
 
   function split(address receiverOne, address receiverTwo) payable {
+    require(msg.value > 0);
+    require(receiverOne != receiverTwo);
+    require(receiverOne != 0x0 && receiverTwo != 0x0);
+    require(receiverOne != msg.sender && receiverTwo != msg.sender);
+
     uint half = msg.value / 2;
     uint8 remainder = uint8(msg.value % 2);
     balances[receiverOne] += half;
